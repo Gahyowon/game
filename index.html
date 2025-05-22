@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>해님달님 게임</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+    button { display: block; margin-top: 1rem; padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>해님달님 이야기</h1>
+  <div id="scene">불러오는 중...</div>
+  <div id="choices"></div>
+
+  <script>
+    let currentScene = "scene1";
+
+    async function loadStory() {
+      const res = await fetch("haenim_dallim_story.json");
+      return await res.json();
+    }
+
+    function renderScene(story, chapter, sceneId) {
+      const scene = story[chapter][sceneId];
+      document.getElementById("scene").innerText = scene.text;
+      const choices = document.getElementById("choices");
+      choices.innerHTML = "";
+
+      for (const key of Object.keys(scene)) {
+        if (key.startsWith("q")) {
+          const btn = document.createElement("button");
+          btn.textContent = scene[key];
+          btn.onclick = () => {
+            // 임시 연결 구조 (필요 시 확장 가능)
+            const nextScene = scene.next?.[key];
+            if (nextScene) {
+              renderScene(story, chapter, nextScene);
+            } else {
+              alert("다음 장면은 아직 준비 중입니다.");
+            }
+          };
+          choices.appendChild(btn);
+        }
+      }
+    }
+
+    loadStory().then(story => {
+      renderScene(story, "chapter1", currentScene);
+    });
+  </script>
+</body>
+</html>
